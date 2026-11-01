@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" width="240" height="64" role="img" aria-label="Hillside Dairy">
+  <path d="M6 50c10-20 24-28 40-24 10 2 16 10 18 24z" fill="#8bb174"/>
+  <path d="M26 50c6-10 14-14 24-12 6 1 10 6 12 12z" fill="#5d8a4a"/>
+  <circle cx="46" cy="18" r="5" fill="#f3f0e8" stroke="#5d8a4a" stroke-width="2"/>
+  <text x="76" y="30" font-family="ui-rounded, 'SF Pro Rounded', system-ui, sans-serif" font-size="18" font-weight="700" fill="#3f5b35">Hillside</text>
+  <text x="76" y="50" font-family="ui-rounded, 'SF Pro Rounded', system-ui, sans-serif" font-size="14" font-weight="500" fill="#5d8a4a">Dairy</text>
+</svg>

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem
+    url: https://github.com/blocks-web/blocks/security/advisories/new
+    about: Please report vulnerabilities privately, never in a public issue.
+  - name: Read how Blocks works
+    url: https://github.com/blocks-web/blocks/blob/main/docs/ARCHITECTURE.md
+    about: Blocks, pages, the server and the editor, explained for developers.

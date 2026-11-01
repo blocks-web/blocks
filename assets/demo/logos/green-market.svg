@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" width="240" height="64" role="img" aria-label="Green Market">
+  <rect x="8" y="8" width="48" height="48" rx="12" fill="#3e8e5e"/>
+  <path d="M20 44c0-14 10-24 24-24 0 14-10 24-24 24z" fill="#dff1e4"/>
+  <path d="M22 42l18-18" stroke="#3e8e5e" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="70" y="41" font-family="ui-rounded, 'SF Pro Rounded', system-ui, sans-serif" font-size="22" font-weight="700" fill="#2f5c40" letter-spacing="0.5">Green Market</text>
+</svg>

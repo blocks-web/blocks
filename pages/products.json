@@ -1,0 +1,129 @@
+{
+  "title": "Menu",
+  "description": "Luna Café's menu: specialty coffee, cold drinks and homemade cakes, with prices.",
+  "access": "public",
+  "blocks": [
+    {
+      "id": "b_m1tlu6t1",
+      "type": "text",
+      "props": {
+        "title": "What we serve",
+        "text": "Every coffee is made with beans we roast ourselves. Plant-based milk (oat, almond or soy) comes at no extra cost.",
+        "align": "center",
+        "headingLevel": "h1"
+      }
+    },
+    {
+      "id": "b_pricing1",
+      "type": "pricing",
+      "props": {
+        "title": "Coffee",
+        "subtitle": "",
+        "style": "lines",
+        "columns": "2",
+        "items": [
+          {
+            "name": "Espresso",
+            "description": "Short and intense, with notes of dark chocolate and caramel.",
+            "price": "$3.00",
+            "tag": ""
+          },
+          {
+            "name": "Cappuccino",
+            "description": "A double espresso with silky steamed milk, in a 6 oz cup.",
+            "price": "$4.50",
+            "tag": ""
+          },
+          {
+            "name": "Flat white",
+            "description": "More coffee, less foam.",
+            "price": "$4.75",
+            "tag": "House favorite"
+          },
+          {
+            "name": "Cold brew",
+            "description": "Steeped cold for 18 hours and served over ice. Refreshing, with a gentle sweetness.",
+            "price": "$5.00",
+            "tag": "New"
+          },
+          {
+            "name": "V60 pour-over",
+            "description": "Filter coffee brewed by hand, with the beans of the week.",
+            "price": "$4.25",
+            "tag": ""
+          },
+          {
+            "name": "Beans to take home",
+            "description": "A half-pound bag, whole or ground while you wait. [Order a bag](/contact).",
+            "price": "$16.00",
+            "tag": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_pricing2",
+      "type": "pricing",
+      "props": {
+        "title": "From the oven",
+        "subtitle": "Baked here every morning, until they're gone.",
+        "style": "cards",
+        "columns": "2",
+        "items": [
+          {
+            "name": "Carrot cake",
+            "description": "With walnuts, cinnamon and cream cheese frosting.",
+            "price": "$5.50",
+            "tag": ""
+          },
+          {
+            "name": "Butter croissant",
+            "description": "Crisp on the outside, soft on the inside.",
+            "price": "$3.50",
+            "tag": ""
+          },
+          {
+            "name": "Blueberry muffin",
+            "description": "Light and fluffy, with whole blueberries and a hint of lemon.",
+            "price": "$3.75",
+            "tag": "Vegan"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_list0001",
+      "type": "list",
+      "props": {
+        "title": "Good to know",
+        "style": "checks",
+        "columns": "2",
+        "items": [
+          {
+            "text": "Plant-based milk at no extra cost"
+          },
+          {
+            "text": "We grind your beans while you wait, just the way you like them"
+          },
+          {
+            "text": "The cakes usually sell out around noon"
+          },
+          {
+            "text": "Ordering for an event? Let us know a day ahead"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_0b9yof52",
+      "type": "button",
+      "props": {
+        "text": "Order for an event",
+        "link": "/contact",
+        "style": "outline",
+        "size": "normal",
+        "align": "center"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Luna Café",
+  "lang": "en",
+  "theme": {
+    "primary": "#7f6057",
+    "text": "#2b211d",
+    "background": "#ffffff",
+    "surface": "#faf6f2",
+    "font": "ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    "radius": "12px"
+  },
+  "loginPage": "/login"
+}

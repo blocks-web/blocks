@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-t>Page being edited</title>
+<link rel="stylesheet" href="/core/base.css">
+<style id="b-theme"></style>
+<style id="b-css"></style>
+<style id="b-editor">
+  /* Only in the editor: nothing from here reaches the site. The colors are the ones in docs/DESIGN.md. */
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: pan-y pinch-zoom; }
+  html.b-dragging, html.b-dragging * { cursor: grabbing !important; }
+
+  /* The block being dragged lifts off the page (the wrapper has no box: the style goes on the children). */
+  .b-lifted > * { opacity: 0.35; transform: scale(0.985); transition: opacity 150ms ease-out, transform 150ms ease-out; }
+
+  /* On the site, the shared zones have no wrapper; here we hide it so it looks the same. */
+  .b-zone { display: contents; }
+
+  /* The content of other iframes (maps, videos) must not steal the clicks. */
+  iframe, embed, object { pointer-events: none; }
+
+  /* ---- The empty areas: "Drag a block here or press +" ---- */
+  .b-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 80px;
+    margin: 6px 0;
+    padding: 14px 16px;
+    border: 1.5px dashed #f8c9b0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.75);
+    color: #6f625c;
+    font: 500 13px/1.45 ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable", system-ui, sans-serif;
+    text-align: center;
+    transition: background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  .b-empty > * { margin: 0; }
+  .b-empty-text { display: block; }
+  .b-empty-title { color: #2b211d; font-size: 16px; font-weight: 600; }
+  .b-empty-plus {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+    padding: 0;
+    border: 1.5px solid #e8562a;
+    border-radius: 50%;
+    background: #fff;
+    color: #e8562a;
+    cursor: pointer;
+    transition: background-color 150ms ease-out, color 150ms ease-out, transform 150ms ease-out;
+  }
+  .b-empty-plus:hover { background: #e8562a; color: #fff; }
+  .b-empty-plus:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(232, 86, 42, 0.35); }
+  .b-empty-plus svg { width: 18px; height: 18px; }
+  [data-slot="root"] > .b-empty {
+    width: auto;
+    min-height: 260px;
+    margin: 28px;
+    background: #faf6f2;
+  }
+  [data-slot="root"] > .b-empty .b-empty-plus { width: 40px; height: 40px; margin-bottom: 8px; }
+  [data-slot="root"] > .b-empty .b-empty-plus svg { width: 22px; height: 22px; }
+  [data-slot="root"] > .b-empty .b-empty-text { font-size: 14px; font-weight: 400; }
+  .b-empty.b-empty--target {
+    border-style: solid;
+    border-color: #e8562a;
+    background: #fdede4;
+    color: #a8402c;
+    box-shadow: 0 0 0 3px rgba(232, 86, 42, 0.18);
+  }
+
+  div.b-missing,
+  div.b-error {
+    display: block;
+    box-sizing: border-box;
+    margin: 10px 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font: 500 13px/1.45 ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable", system-ui, sans-serif;
+  }
+  /* Tall enough that the selected block's bar (put inside, at the top) doesn't cover the text. */
+  div.b-missing { min-height: 3rem; padding-top: 44px; background: #fbeae7; border: 1.5px dashed #efc4bd; color: #7d2a1f; }
+  div.b-error { background: #fbeae7; border: 1.5px solid #efc4bd; color: #7d2a1f; white-space: pre-wrap; }
+
+  /* ---- The editor's tools, at their size on screen ----
+     When the page doesn't fit, the editor scales it down (transform: scale) and sets --b-ui = 1 / scale: the
+     bar, the handles, the labels, "+" and the empty areas' texts grow back (nothing under 12 px on screen).
+     The positions stay in the page's coordinates; only the size changes. */
+  #b-ui .b-ui-bar, #b-ui .b-ui-tag, #b-ui .b-ui-position, #b-ui .b-ui-handle, #b-ui .b-ui-zone-label,
+  #b-ui .b-ui-note > *, #b-ui .b-ui-plus button, .b-empty > *, div.b-missing, div.b-error { zoom: var(--b-ui, 1); }
+
+  /* ---- Outlines, labels, "+" and the drop indicator ---- */
+  #b-ui, #b-ui * { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; line-height: 1; letter-spacing: normal; text-transform: none; }
+  #b-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    font: 600 12px/1 ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable", system-ui, sans-serif;
+    color: #2b211d;
+  }
+  #b-ui .b-ui-box { position: absolute; top: 0; left: 0; display: none; }
+  #b-ui .b-ui-hover { border: 1px solid rgba(232, 86, 42, 0.6); border-radius: 3px; }
+  #b-ui .b-ui-sel { border: 2px solid #e8562a; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7); }
+
+  /* The label of the block under the mouse. */
+  #b-ui .b-ui-tag {
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    max-width: 260px;
+    margin-bottom: 4px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #fdede4;
+    color: #a8402c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #b-ui .b-ui-inside .b-ui-tag { bottom: auto; top: 6px; left: 6px; margin: 0; }
+
+  /* The selected block's bar: its name (to drag it by) + actions. */
+  #b-ui .b-ui-bar {
+    position: absolute;
+    left: -2px;
+    bottom: 100%;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 32px;
+    margin-bottom: 6px;
+    padding: 0 3px 0 0;
+    border: 1px solid #eae1da;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 10px 30px -18px rgba(60, 30, 20, 0.35), 0 1px 2px rgba(60, 30, 20, 0.08);
+    pointer-events: auto;
+    white-space: nowrap;
+  }
+  #b-ui .b-ui-inside .b-ui-bar { bottom: auto; top: 6px; left: 6px; margin: 0; }
+  #b-ui .b-ui-grip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    max-width: 220px;
+    padding: 0 10px 0 6px;
+    border-radius: 9px 0 0 9px;
+    color: #2b211d;
+    cursor: grab;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #b-ui .b-ui-grip:hover { background: #fdede4; }
+  #b-ui .b-ui-grip > svg { width: 14px; height: 14px; color: #9c8f88; flex: none; }
+  #b-ui .b-ui-grip .b-ui-tile {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: #fdede4;
+    color: #a8402c;
+    font-size: 12px;
+    flex: none;
+  }
+  #b-ui .b-ui-grip .b-ui-tile svg { width: 15px; height: 15px; }
+  #b-ui .b-ui-sep { width: 1px; height: 18px; margin: 0 2px; background: #eae1da; }
+  #b-ui .b-ui-bar button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 26px;
+    border-radius: 7px;
+    color: #6f625c;
+    cursor: pointer;
+    transition: background-color 150ms ease-out, color 150ms ease-out;
+  }
+  #b-ui .b-ui-bar button:hover { background: #fdede4; color: #a8402c; }
+  #b-ui .b-ui-bar button[data-tool="remove"]:hover { background: #fbeae7; color: #c0392b; }
+  #b-ui .b-ui-bar button svg { width: 16px; height: 16px; }
+
+  /* The shared zone under the mouse (header / footer): click to edit it. */
+  #b-ui .b-ui-zone { border: 1.5px dashed rgba(232, 86, 42, 0.55); background: rgba(232, 86, 42, 0.05); }
+  #b-ui .b-ui-zone-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #2b211d;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 10px 30px -18px rgba(60, 30, 20, 0.35);
+  }
+
+  /* The drop line: 3 px of coral with round dots at its ends; it shows in 150 ms and slides between positions. */
+  #b-ui .b-ui-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    height: 3px;
+    border-radius: 2px;
+    background: #e8562a;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+    animation: b-appear 150ms ease-out;
+    transition: transform 120ms ease-out, width 120ms ease-out, height 120ms ease-out;
+  }
+  #b-ui .b-ui-line.b-ui-instant { transition: none; }
+  #b-ui .b-ui-line::before,
+  #b-ui .b-ui-line::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    background: #e8562a;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+  }
+  #b-ui .b-ui-line::before { left: -4px; }
+  #b-ui .b-ui-line::after { right: -4px; }
+  #b-ui .b-ui-line.b-ui-vertical { width: 3px; height: auto; }
+  #b-ui .b-ui-line.b-ui-vertical::before,
+  #b-ui .b-ui-line.b-ui-vertical::after { left: 50%; margin: 0 0 0 -4.5px; }
+  #b-ui .b-ui-line.b-ui-vertical::before { top: -4px; }
+  #b-ui .b-ui-line.b-ui-vertical::after { top: auto; bottom: -4px; }
+  @keyframes b-appear { from { opacity: 0; } }
+
+  /* "+" between two blocks: a thin line with a round button in the middle, only under the mouse. */
+  #b-ui .b-ui-plus {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    height: 2px;
+    border-radius: 1px;
+    background: #e8562a;
+    animation: b-appear 150ms ease-out;
+  }
+  #b-ui .b-ui-plus button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid #e8562a;
+    border-radius: 50%;
+    background: #fff;
+    color: #e8562a;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background-color 150ms ease-out, color 150ms ease-out;
+  }
+  #b-ui .b-ui-plus button:hover { background: #e8562a; color: #fff; }
+  #b-ui .b-ui-plus button svg { width: 15px; height: 15px; }
+
+  /* The block just put on the page: a short coral flash. */
+  #b-ui .b-ui-flash {
+    border: 2px solid #e8562a;
+    border-radius: 3px;
+    background: rgba(232, 86, 42, 0.14);
+    animation: b-fade 220ms ease-out 280ms forwards;
+  }
+  @keyframes b-fade { to { opacity: 0; } }
+
+  html.b-dragging #b-ui .b-ui-bar, html.b-dragging #b-ui .b-ui-sel, html.b-dragging #b-ui .b-ui-plus { display: none !important; }
+  #b-ui .b-ui-bar button:disabled { opacity: 0.35; cursor: default; }
+  #b-ui .b-ui-bar button:disabled:hover { background: none; color: #6f625c; }
+
+  /* ---- Free canvas ---- */
+
+  /* The empty rows under the last block (only in the editor); stacked, the canvas doesn't have them (640px = LIMITS.phone). */
+  .b-reserve { visibility: hidden; pointer-events: none; min-width: 0; min-height: 0; }
+  @container b-grid (width < 640px) { .b-grid > .b-reserve { display: none; } }
+
+  /* The grid's lines, barely visible, while you move or resize a block: 12 columns as tinted bands
+     (no drawn edges: the white space between them is the edge) and the rows as thin threads. */
+  #b-ui .b-ui-grid { position: absolute; top: 0; left: 0; display: none; animation: b-appear 150ms ease-out; }
+  #b-ui .b-ui-grid i { position: absolute; display: block; }
+  #b-ui .b-ui-grid-col { top: 0; bottom: 0; border-radius: 2px; background: rgba(232, 86, 42, 0.05); }
+  #b-ui .b-ui-grid-row { left: 0; right: 0; height: 0; border-top: 1px solid rgba(232, 86, 42, 0.1); }
+
+  /* The target box: a new block's ghost (dashed) or the moved block's outline, with its place underneath. */
+  #b-ui .b-ui-target { border: 2px solid #e8562a; border-radius: 4px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7); }
+  #b-ui .b-ui-target--ghost { border-style: dashed; border-radius: 8px; background: rgba(232, 86, 42, 0.1); animation: b-appear 150ms ease-out; }
+  #b-ui .b-ui-position {
+    position: absolute;
+    left: -2px;
+    top: calc(100% + 8px);
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: #2b211d;
+    color: #fff;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 0 10px 30px -18px rgba(60, 30, 20, 0.35);
+  }
+  #b-ui .b-ui-position:empty, #b-ui .b-ui-size { display: none; }
+  html.b-resizing #b-ui .b-ui-size:not(:empty) { display: inline-flex; }
+
+  /* The 8 handles: circles at the corners, pills on the edges, centered on the block's outline. */
+  #b-ui .b-ui-handle {
+    position: absolute;
+    display: none;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid #e8562a;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(60, 30, 20, 0.28);
+    pointer-events: auto;
+    touch-action: none;
+    transition: background-color 150ms ease-out;
+  }
+  #b-ui .b-ui-handle::before { content: ""; position: absolute; inset: -7px; } /* easier to grab */
+  #b-ui .b-ui-handle:hover { background: #e8562a; }
+  #b-ui .b-ui-free > .b-ui-handle { display: block; }
+  #b-ui .b-ui-narrow > .b-ui-handle--n, #b-ui .b-ui-narrow > .b-ui-handle--s,
+  #b-ui .b-ui-short > .b-ui-handle--e, #b-ui .b-ui-short > .b-ui-handle--w { display: none; }
+  #b-ui .b-ui-handle--nw { left: -7px; top: -7px; cursor: nwse-resize; }
+  #b-ui .b-ui-handle--ne { right: -7px; top: -7px; cursor: nesw-resize; }
+  #b-ui .b-ui-handle--se { right: -7px; bottom: -7px; cursor: nwse-resize; }
+  #b-ui .b-ui-handle--sw { left: -7px; bottom: -7px; cursor: nesw-resize; }
+  #b-ui .b-ui-handle--n, #b-ui .b-ui-handle--s { left: 50%; width: 20px; height: 8px; margin-left: -10px; cursor: ns-resize; }
+  #b-ui .b-ui-handle--n { top: -5px; }
+  #b-ui .b-ui-handle--s { bottom: -5px; }
+  #b-ui .b-ui-handle--e, #b-ui .b-ui-handle--w { top: 50%; width: 8px; height: 20px; margin-top: -10px; cursor: ew-resize; }
+  #b-ui .b-ui-handle--e { right: -5px; }
+  #b-ui .b-ui-handle--w { left: -5px; }
+  #b-ui .b-ui-free > .b-ui-bar { margin-bottom: 11px; } /* above the handles, not over them */
+  #b-ui .b-ui-free.b-ui-inside > .b-ui-bar { top: 11px; left: 11px; }
+  html.b-resizing #b-ui .b-ui-bar { display: none !important; }
+  html.b-resizing--ns, html.b-resizing--ns * { cursor: ns-resize !important; }
+  html.b-resizing--ew, html.b-resizing--ew * { cursor: ew-resize !important; }
+  html.b-resizing--nwse, html.b-resizing--nwse * { cursor: nwse-resize !important; }
+  html.b-resizing--nesw, html.b-resizing--nesw * { cursor: nesw-resize !important; }
+
+  /* On a phone (the canvas stacked): why it looks different. */
+  #b-ui .b-ui-note {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    align-items: flex-start;
+    gap: 6px;
+    width: max-content; /* the #b-ui layer has no width: without this, the note would shrink to one word */
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: #fdede4;
+    color: #a8402c;
+    font-weight: 500;
+    line-height: 1.35;
+    white-space: normal;
+    box-shadow: 0 1px 2px rgba(60, 30, 20, 0.08);
+  }
+  #b-ui .b-ui-note svg { width: 14px; height: 14px; margin-top: 1px; flex: none; }
+
+  /* On a touch screen the line is thicker, so it shows from under the finger, and the handles are bigger. */
+  @media (pointer: coarse) {
+    #b-ui .b-ui-line { height: 4px; }
+    #b-ui .b-ui-line.b-ui-vertical { width: 4px; height: auto; }
+    #b-ui .b-ui-handle { width: 16px; height: 16px; }
+    #b-ui .b-ui-handle--nw { left: -9px; top: -9px; }
+    #b-ui .b-ui-handle--ne { right: -9px; top: -9px; }
+    #b-ui .b-ui-handle--se { right: -9px; bottom: -9px; }
+    #b-ui .b-ui-handle--sw { left: -9px; bottom: -9px; }
+    #b-ui .b-ui-handle--n, #b-ui .b-ui-handle--s { width: 26px; height: 10px; margin-left: -13px; }
+    #b-ui .b-ui-handle--n { top: -6px; }
+    #b-ui .b-ui-handle--s { bottom: -6px; }
+    #b-ui .b-ui-handle--e, #b-ui .b-ui-handle--w { width: 10px; height: 26px; margin-top: -13px; }
+    #b-ui .b-ui-handle--e { right: -6px; }
+    #b-ui .b-ui-handle--w { left: -6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #b-ui *, .b-empty, .b-empty-plus, .b-lifted > * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .b-canvas-error {
+    margin: 32px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: #fbeae7;
+    border: 1px solid #efc4bd;
+    color: #7d2a1f;
+    font: 14px/1.5 ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable", system-ui, sans-serif;
+  }
+</style>
+<script type="module" src="/_editor/canvas.js"></script>
+</head>
+<body></body>
+</html>

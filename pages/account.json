@@ -1,0 +1,38 @@
+{
+  "title": "My account",
+  "description": "Your Luna Café account.",
+  "access": "members",
+  "blocks": [
+    {
+      "id": "b_dgmsb611",
+      "type": "section",
+      "props": {
+        "background": "surface",
+        "spacing": "medium",
+        "align": "left"
+      },
+      "slots": {
+        "content": [
+          {
+            "id": "b_z7e82006",
+            "type": "account",
+            "props": {
+              "greeting": "Hi",
+              "logoutText": "Log out",
+              "afterLogout": "/"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_kthvlb3t",
+      "type": "text",
+      "props": {
+        "title": "What you get as a member",
+        "text": "- 15% off any coffee on Saturdays and Sundays\n- Invitations to our new-bean tastings\n- A coffee on the house on your birthday\n\nJust give us your account email at the counter, and we'll take care of the rest.",
+        "align": "left"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# What the server saves (accounts, sessions, messages): never in git.
+data/
+
+# The static export can be rebuilt any time with "node blocks.js build".
+dist/
+
+# Images uploaded from the editor belong to each site, not to Blocks.
+assets/uploads/
+
+# The project's internal documents live in their own private repository.
+docs/propuneri/
+
+# Local tool settings.
+.claude/
+.vscode/
+.idea/
+
+# Temporary and system files.
+node_modules/
+*.tmp
+.DS_Store

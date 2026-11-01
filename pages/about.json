@@ -1,0 +1,135 @@
+{
+  "title": "About us",
+  "access": "public",
+  "description": "How Luna Café started: our story, the people behind the counter and what the papers wrote about us.",
+  "blocks": [
+    {
+      "id": "b_o8li5wkp",
+      "type": "hero",
+      "props": {
+        "title": "Our story",
+        "subtitle": "We've been making coffee downtown since 2019, with care and a lot of patience.",
+        "buttonText": "Come by for a coffee",
+        "buttonLink": "/contact",
+        "button2Text": "",
+        "button2Link": "#",
+        "image": "",
+        "align": "center",
+        "height": "medium"
+      },
+      "slots": {}
+    },
+    {
+      "id": "b_80f4xjqr",
+      "type": "text",
+      "props": {
+        "title": "How it started",
+        "headingLevel": "h2",
+        "text": "We started with a single espresso machine and a lot of stubbornness, in a room of about 200 square feet.\n\nToday we have 12 seats, a terrace full of flowers and the best carrot cake in the neighborhood. Come and see for yourself!",
+        "align": "left"
+      },
+      "slots": {}
+    },
+    {
+      "id": "b_team0001",
+      "type": "team",
+      "props": {
+        "title": "The team",
+        "subtitle": "The people behind the counter, the roaster and the oven.",
+        "columns": "3",
+        "people": [
+          {
+            "image": "",
+            "name": "Emma Carter",
+            "role": "Founder and head barista",
+            "text": "She opened Luna in 2019 with one espresso machine and three tables. She still picks the beans.",
+            "link": ""
+          },
+          {
+            "image": "",
+            "name": "Mike Russo",
+            "role": "Roaster",
+            "text": "He roasts the beans every Tuesday and knows every batch by heart.",
+            "link": ""
+          },
+          {
+            "image": "",
+            "name": "Anna Price",
+            "role": "Pastry chef",
+            "text": "The carrot cake is hers. So are the croissants, ready at 7 every morning.",
+            "link": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_timeline1",
+      "type": "timeline",
+      "props": {
+        "title": "How we grew, year by year",
+        "moments": [
+          {
+            "year": "2019",
+            "title": "We open with one espresso machine and three tables",
+            "text": "A tiny room on Linden Street and a short menu: espresso, cappuccino and carrot cake."
+          },
+          {
+            "year": "2020",
+            "title": "Coffee through the window",
+            "text": "When nobody could sit inside, we served through the window. The neighbors came by every morning."
+          },
+          {
+            "year": "2021",
+            "title": "The flower terrace",
+            "text": "Four tables outside and geraniums in pots. From April to October, it's everyone's favorite spot."
+          },
+          {
+            "year": "2023",
+            "title": "We start roasting our own",
+            "text": "A small roaster in the back and our first bags of beans to take home. We share every new batch in our [news](/)."
+          },
+          {
+            "year": "2025",
+            "title": "Our first tasting",
+            "text": "Three different beans, their stories and twelve full seats. We've held one every year since."
+          },
+          {
+            "year": "2026",
+            "title": "12 seats and a team of five",
+            "text": "We knocked through the wall into the old storeroom. Now there's room for everyone, laptops and strollers alike."
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_press0001",
+      "type": "press",
+      "props": {
+        "title": "In the press",
+        "subtitle": "A few lines from the papers and blogs that came through our door.",
+        "columns": "3",
+        "newestFirst": true,
+        "articles": [
+          {
+            "source": "Morning Radio",
+            "date": "2025-06-21",
+            "text": "A report from the flower terrace: how one espresso machine and three tables grew into a café with its own roaster.",
+            "link": ""
+          },
+          {
+            "source": "The Neighborhood Gazette",
+            "date": "2026-03-14",
+            "text": "The best carrot cake in town comes from a 12-seat café on Linden Street.",
+            "link": "https://example.com/gazette/luna-cafe"
+          },
+          {
+            "source": "The “Coffee Break” blog",
+            "date": "2025-11-02",
+            "text": "Luna is the kind of place where the barista remembers what you drink. The V60 with the beans of the week: jasmine and peach, just as promised.",
+            "link": "https://example.com/blog/luna-cafe"
+          }
+        ]
+      }
+    }
+  ]
+}

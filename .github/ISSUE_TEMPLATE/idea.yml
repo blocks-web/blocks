@@ -1,0 +1,46 @@
+name: Idea
+description: Something you'd like Blocks to do, or to do better.
+title: "Idea: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! Start with the problem, not the solution: what you were trying to do and what got in the way.
+
+        Blocks grows with new blocks rather than new options, so a new block is often the simplest answer. The reasons are in [PHILOSOPHY.md](https://github.com/blocks-web/blocks/blob/main/docs/PHILOSOPHY.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The situation, in your own words.
+      placeholder: For example, “A café I work for wants to show a menu that changes every day, and the owner should update it from her phone.”
+    validations:
+      required: true
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you handle it today?
+      description: A workaround, another tool, or not at all.
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: Your idea, if you already have one. A sketch or a screenshot of something similar is welcome.
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who is it for?
+      multiple: true
+      options:
+        - People who build sites without code
+        - Developers who write blocks
+        - Visitors to a site
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Would you like to help?
+      options:
+        - label: I'd like to help build it.

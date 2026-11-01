@@ -1,0 +1,143 @@
+{
+  "title": "Contact",
+  "description": "Write to Luna Café or drop by: our address, opening hours, a map and a contact form.",
+  "access": "public",
+  "blocks": [
+    {
+      "id": "b_9zjq9smd",
+      "type": "text",
+      "props": {
+        "title": "Contact",
+        "text": "Have a question, want to book a table or order some beans? Write to us here, or just drop by.",
+        "align": "left",
+        "headingLevel": "h1"
+      }
+    },
+    {
+      "id": "b_7bziz6rz",
+      "type": "columns",
+      "props": {
+        "columns": "2",
+        "spacing": "large",
+        "align": "top",
+        "reverseOnPhone": false
+      },
+      "slots": {
+        "c1": [
+          {
+            "id": "b_r40pf1sj",
+            "type": "form",
+            "props": {
+              "title": "Send us a message",
+              "text": "We usually reply the same day.",
+              "fields": [
+                {
+                  "label": "Name",
+                  "type": "text",
+                  "required": true,
+                  "options": ""
+                },
+                {
+                  "label": "Email",
+                  "type": "email",
+                  "required": true,
+                  "options": ""
+                },
+                {
+                  "label": "Phone",
+                  "type": "phone",
+                  "required": false,
+                  "options": ""
+                },
+                {
+                  "label": "What's it about?",
+                  "type": "choice",
+                  "required": false,
+                  "options": "Booking a table, Ordering beans, An event, Something else"
+                },
+                {
+                  "label": "Message",
+                  "type": "longtext",
+                  "required": true,
+                  "options": ""
+                }
+              ],
+              "buttonText": "Send message",
+              "successMessage": "Thank you! We got your message and will reply soon.",
+              "noServerMessage": "This form doesn't work here. Email us at hello@example.com, or just drop by."
+            }
+          },
+          {
+            "id": "b_rg7y8oil",
+            "type": "text",
+            "props": {
+              "title": "",
+              "text": "For bean orders or group bookings, email us at [hello@example.com](mailto:hello@example.com).",
+              "align": "left"
+            }
+          }
+        ],
+        "c2": [
+          {
+            "id": "b_places01",
+            "type": "locations",
+            "props": {
+              "title": "Where to find us",
+              "columns": "1",
+              "mapText": "View on the map",
+              "places": [
+                {
+                  "label": "Downtown",
+                  "name": "Luna Café",
+                  "address": "12 Linden Street\nNext to the park downtown",
+                  "hours": "",
+                  "phone": "(555) 010-0123",
+                  "tags": "Terrace, Free Wi-Fi, Outlets at the tables",
+                  "mapLink": ""
+                }
+              ]
+            }
+          },
+          {
+            "id": "b_hours001",
+            "type": "hours",
+            "props": {
+              "title": "Opening hours",
+              "rows": [
+                {
+                  "days": "Monday–Friday",
+                  "hours": "8 am–8 pm"
+                },
+                {
+                  "days": "Saturday",
+                  "hours": "9 am–8 pm"
+                },
+                {
+                  "days": "Sunday",
+                  "hours": "9 am–6 pm"
+                },
+                {
+                  "days": "Public holidays",
+                  "hours": "Closed"
+                }
+              ],
+              "note": "The terrace is open whenever the weather is nice.",
+              "highlightToday": true
+            }
+          },
+          {
+            "id": "b_map00001",
+            "type": "map",
+            "props": {
+              "address": "12 Linden Street",
+              "linkText": "View on the map",
+              "showMap": false,
+              "zoom": "street",
+              "height": "medium"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

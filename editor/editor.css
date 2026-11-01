@@ -1,0 +1,2861 @@
+/* The Blocks editor (docs/DESIGN.md). The editor's colors are separate from the site's theme:
+   coral is for what's interactive or selected, not for decoration. */
+
+:root {
+  --accent: #e8562a;
+  --accent-pressed: #c8431f;
+  --accent-dark: #a8402c;
+  --accent-light: #fdede4;
+  --accent-tint: #f8c9b0;
+  --ink: #2b211d;
+  --text-2: #6f625c;
+  --text-faint: #9c8f88;
+  --line: #eae1da;
+  --line-strong: #d9ccc3;
+  --paper: #ffffff;
+  --panel: #faf6f2;
+  --canvas: #f2ece6;
+  --ok: #3e8e5e;
+  --danger: #c0392b;
+  --danger-pressed: #a9311f;
+  --danger-dark: #7d2a1f;
+  --danger-light: #fbeae7;
+  --danger-tint: #efc4bd;
+  --shadow: 0 10px 30px -18px rgba(60, 30, 20, 0.35);
+  --ring: 0 0 0 3px rgba(232, 86, 42, 0.35);
+  --font: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI Variable", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius-field: 10px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --ease: 150ms ease-out;
+  --ease-move: 220ms ease-out;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font: 14px/1.45 var(--font);
+  color: var(--ink);
+  background: var(--panel);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.ic {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.ic svg {
+  display: block;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* The "×" in search fields: drawn like our icons, not the browser's blue one. */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239c8f88' stroke-width='1.75' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center / 16px no-repeat;
+  cursor: pointer;
+}
+
+input[type="search"]::-webkit-search-cancel-button:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232b211d' stroke-width='1.75' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
+}
+
+/* ---- A block's tile (palette, Structure, the settings panel, the ghost) ---- */
+
+.tile {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-card);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  font-size: 18px;
+  line-height: 1;
+  flex: none;
+}
+
+.tile svg {
+  display: block;
+}
+
+.tile--small {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* ---- Layout ---- */
+
+/* The app takes exactly the screen and never scrolls as a whole:
+   only the panels and the canvas scroll. */
+.app {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 272px minmax(0, 1fr) 320px;
+  grid-template-rows: 52px minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+}
+
+.topbar {
+  grid-column: 1 / -1;
+  display: grid;
+  /* The right side holds more (the save status, the language, two buttons): it gets a little more room,
+     which also brings the screen widths closer to the middle of the canvas below them. */
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.15fr);
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  z-index: 20;
+}
+
+.topbar__left,
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.topbar__right {
+  justify-content: flex-end;
+}
+
+.topbar__sep {
+  width: 1px;
+  height: 22px;
+  margin: 0 2px;
+  background: var(--line);
+  flex: none;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 8px 0 2px;
+  border-radius: var(--radius-field);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  flex: none;
+}
+
+.brand img {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+
+.left-pane,
+.right-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+}
+
+.left-pane {
+  --search-height: 54px; /* the search stuck at the top; the category titles stick under it */
+  border-right: 1px solid var(--line);
+}
+
+.right-pane {
+  border-left: 1px solid var(--line);
+}
+
+/* ---- Buttons ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease);
+  flex: none;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--panel);
+  border-color: var(--text-faint);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-pressed);
+  border-color: var(--accent-pressed);
+}
+
+.btn--quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-2);
+}
+
+.btn--quiet:hover:not(:disabled) {
+  background: var(--accent-light);
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.btn--icon {
+  width: 34px;
+  padding: 0;
+}
+
+.btn--small {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.btn--small.btn--icon {
+  width: 30px;
+  padding: 0;
+}
+
+.btn--wide {
+  width: 100%;
+}
+
+.btn--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: var(--danger-pressed);
+  border-color: var(--danger-pressed);
+}
+
+.btn--danger-outline {
+  color: var(--danger);
+}
+
+.btn--danger-outline:hover:not(:disabled) {
+  background: var(--danger-light);
+  border-color: var(--danger);
+}
+
+.btn__sub {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn--parent {
+  justify-content: flex-start;
+}
+
+.btn-group {
+  display: inline-flex;
+  flex: none;
+}
+
+.btn-group .btn:first-child {
+  border-radius: var(--radius-field) 0 0 var(--radius-field);
+}
+
+.btn-group .btn:last-child {
+  margin-left: -1px;
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+}
+
+/* ---- The top bar ---- */
+
+.doc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 300px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  text-align: left;
+  transition: background-color var(--ease), border-color var(--ease);
+}
+
+.doc-button:hover,
+.doc-button[aria-expanded="true"] {
+  background: var(--panel);
+  border-color: var(--text-faint);
+}
+
+.doc-button > .ic:first-child {
+  color: var(--text-2);
+}
+
+.doc-button__title {
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.doc-button__path {
+  flex: none;
+  max-width: 110px;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.doc-button__path--text {
+  font-family: var(--font);
+  font-size: 12px;
+}
+
+.doc-button > .ic:last-child {
+  color: var(--text-faint);
+  margin-left: 2px;
+}
+
+.segment {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: var(--radius-field);
+  background: var(--canvas);
+}
+
+.segment button {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.segment button:hover {
+  color: var(--ink);
+}
+
+.segment button[aria-pressed="true"] {
+  background: var(--paper);
+  color: var(--accent);
+}
+
+/* The editor's language (EN / RO): the same switch, with two short words instead of icons. */
+.segment--text button {
+  width: 26px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.segment--text button[aria-pressed="true"] {
+  cursor: default;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  min-width: 0;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: default;
+  transition: color var(--ease), border-color var(--ease);
+}
+
+.status__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.status--saved .status__dot {
+  background: var(--ok);
+}
+
+.status--saving {
+  color: var(--accent);
+  border-color: var(--accent-tint);
+}
+
+.status--saving .status__dot {
+  width: 11px;
+  height: 11px;
+  background: none;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+.status--unsaved {
+  cursor: pointer;
+}
+
+.status--unsaved .status__dot {
+  background: none;
+  border: 2px solid var(--text-faint);
+}
+
+.status--error {
+  color: var(--danger);
+  border-color: var(--danger-tint);
+  cursor: pointer;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- The left panel ---- */
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 10px 12px 0;
+  padding: 3px;
+  border-radius: var(--radius-field);
+  background: var(--canvas);
+  flex: none;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 600;
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pane {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* The block that gets the focus (Tab, arrows) doesn't end up under the search and the category title. */
+#pane-blocks {
+  scroll-padding-top: calc(var(--search-height) + 36px);
+}
+
+.search {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: var(--search-height);
+  margin: 0;
+  padding: 10px 12px 8px;
+  background: var(--panel);
+}
+
+.search__icon {
+  position: absolute;
+  left: 23px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px 0 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  outline: none;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.search input::placeholder {
+  color: var(--text-faint);
+}
+
+.search input:hover {
+  border-color: var(--line-strong);
+}
+
+.search input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.palette {
+  padding: 0 12px 16px;
+}
+
+.palette__group + .palette__group {
+  margin-top: 8px;
+}
+
+/* A category's title (in the palette and in the "+" menu). */
+.palette__category {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* In the palette it stays stuck under the search while you scroll its blocks: you always know where you are. */
+.palette .palette__category {
+  position: sticky;
+  top: var(--search-height);
+  z-index: 1;
+  margin: 0 -4px;
+  padding: 8px 8px 6px;
+  background: var(--panel);
+}
+
+.palette__list {
+  display: grid;
+  gap: 2px;
+}
+
+.palette__tip {
+  margin: 20px 8px 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+}
+
+.block-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  background: transparent;
+  text-align: left;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pan-y pinch-zoom; /* a finger that slides scrolls; one that stays for 250 ms lifts the block */
+  -webkit-touch-callout: none;
+  transition: background-color var(--ease), border-color var(--ease);
+}
+
+.block-item:hover,
+.block-item:focus-visible {
+  border-color: var(--line);
+  background: var(--paper);
+}
+
+.block-item:active {
+  cursor: grabbing;
+}
+
+.block-item__text {
+  display: grid;
+  min-width: 0;
+}
+
+.block-item__name {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.block-item__desc {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* "server": a quiet label at the start of the description (in the palette) or next to the name (in the card). */
+.block-item__badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 17px;
+  vertical-align: 1px;
+  white-space: nowrap;
+  flex: none;
+}
+
+.block-item__desc .block-item__badge {
+  margin: 0 6px 0 0;
+  line-height: 14px;
+  vertical-align: 0;
+}
+
+.block-item:hover .block-item__badge,
+.block-item:focus-visible .block-item__badge {
+  border-color: var(--line-strong);
+}
+
+/* ---- Structure ---- */
+
+.pane--tree {
+  padding: 10px 10px 24px;
+}
+
+.tree {
+  position: relative;
+}
+
+.tree--dragging .tree__row:hover {
+  background: transparent;
+}
+
+.tree__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 8px 0 calc(4px + var(--level, 0) * 14px);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pan-y pinch-zoom;
+  -webkit-touch-callout: none;
+  transition: background-color var(--ease);
+}
+
+.tree__row:hover,
+.tree__row--hover {
+  background: var(--paper);
+}
+
+.tree__row--selected,
+.tree__row--selected:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.tree__row--selected .tile {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tree__row--missing .tree__name {
+  color: var(--danger);
+}
+
+.tree__toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-faint);
+  flex: none;
+}
+
+.tree__toggle:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.tree__toggle .ic {
+  transition: transform var(--ease);
+}
+
+.tree__toggle--open .ic {
+  transform: rotate(90deg);
+}
+
+.tree__toggle--none {
+  pointer-events: none;
+}
+
+.tree__name {
+  font-weight: 500;
+  white-space: nowrap;
+  flex: none;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree__summary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tree__row--selected .tree__summary {
+  color: var(--accent-dark);
+  opacity: 0.8;
+}
+
+.tree__slot {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding-left: calc(12px + var(--level, 0) * 14px);
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 8px;
+}
+
+/* An area the block doesn't show right now (e.g. "Column 3" with 2 columns), but that has blocks. */
+.tree__slot--hidden {
+  color: var(--danger);
+  cursor: help;
+}
+
+.tree__hidden {
+  margin-left: 2px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--danger-light);
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.tree__group--hidden .tree__row:not(.tree__row--selected) {
+  opacity: 0.7;
+}
+
+.tree__empty {
+  margin: 2px 6px 4px calc(32px + var(--level, 0) * 14px);
+  padding: 5px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.tree__group .tree__empty {
+  margin-left: calc(32px + var(--level, 0) * 14px);
+}
+
+.tree--target {
+  background: var(--accent-light) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent-dark) !important;
+}
+
+.tree__line {
+  position: absolute;
+  right: 4px;
+  display: none;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.tree__line::before,
+.tree__line::after {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.tree__line::before {
+  left: -3px;
+}
+
+.tree__line::after {
+  right: -3px;
+}
+
+.tree__zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  margin: 2px 0;
+  padding: 0 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  background: transparent;
+  color: var(--text-2);
+  text-align: left;
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease);
+}
+
+.tree__zone:hover {
+  border-color: var(--accent-tint);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.tree__zone:first-child {
+  margin-bottom: 8px;
+}
+
+.tree__node + .tree__zone,
+.empty-pane + .tree__zone {
+  margin-top: 8px;
+}
+
+.tree__zone-name {
+  font-weight: 500;
+}
+
+.tree__zone-info {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.tree__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 36px;
+  margin-top: 8px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 500;
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease);
+}
+
+.tree__add:hover,
+.tree__add[aria-expanded="true"] {
+  border-color: var(--accent-tint);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.tree__add .ic {
+  color: var(--accent);
+}
+
+/* ---- The canvas ---- */
+
+.canvas {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--canvas);
+}
+
+.canvas__banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 16px 0;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  color: var(--ink);
+  flex: none;
+}
+
+.canvas__banner > .ic {
+  color: var(--accent);
+}
+
+.canvas__banner-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.canvas__banner .btn {
+  margin-left: auto;
+}
+
+.canvas__banner--members {
+  padding: 7px 12px;
+}
+
+.canvas__banner--members > .ic {
+  color: var(--text-2);
+}
+
+.canvas__stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.sheet {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: var(--shadow), 0 0 0 1px var(--line);
+  flex: none;
+  transition: width var(--ease-move);
+}
+
+.sheet[data-device="phone"],
+.sheet[data-device="tablet"] {
+  border-radius: 16px;
+  box-shadow: 0 0 0 6px var(--paper), 0 0 0 7px var(--line-strong), var(--shadow);
+}
+
+.sheet iframe {
+  display: block;
+  border: 0;
+  background: var(--paper);
+  transform-origin: 0 0;
+}
+
+.dragging .sheet {
+  box-shadow: 0 0 0 2px var(--accent-tint), var(--shadow);
+}
+
+.canvas__zoom {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 12px;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* A toast shows at the same place: the pill steps aside until it's gone. */
+:root:has(.toasts .toast) .canvas__zoom {
+  opacity: 0;
+}
+
+.canvas__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  background: var(--canvas);
+  color: var(--text-2);
+  text-align: center;
+}
+
+.canvas__loading p {
+  margin: 0;
+  max-width: 420px;
+}
+
+.canvas__loading--error > .ic {
+  color: var(--danger);
+}
+
+.canvas__loading-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--accent-tint);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ---- The right panel ---- */
+
+.right-pane__head {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+
+.right-pane__head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.props {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  /* The panel scrolls only down, never sideways. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 16px 40px;
+}
+
+.props-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.props-head__text {
+  min-width: 0;
+}
+
+.props-head__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.props-head__desc {
+  margin: 1px 0 0;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin-top: 12px;
+  color: var(--text-faint);
+}
+
+.crumbs__item {
+  max-width: 120px;
+  padding: 2px 5px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: background-color var(--ease), color var(--ease);
+}
+
+button.crumbs__item:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.crumbs__item--current {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.actions--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* On a canvas: "Move off canvas" fits on two lines, it isn't cut. */
+.actions--three .action {
+  height: auto;
+  min-height: 54px;
+}
+
+.actions--three .action span:last-child {
+  white-space: normal;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 54px;
+  padding: 4px 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color var(--ease), border-color var(--ease), color var(--ease);
+}
+
+.action span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.action:hover:not(:disabled) {
+  border-color: var(--accent-tint);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.action--danger:hover:not(:disabled) {
+  border-color: var(--danger-tint);
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.action:disabled {
+  opacity: 0.4;
+}
+
+.btn--parent {
+  margin-top: 8px;
+}
+
+/* ---- "Placement": a block on the Free canvas ---- */
+
+.placement {
+  display: grid;
+  gap: 14px;
+}
+
+.placement__title {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.placement .notice {
+  margin: 0;
+}
+
+.placement__numbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.placement__number {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.placement__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.placement__range {
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.placement__input {
+  font-variant-numeric: tabular-nums;
+}
+
+.placement .field__help {
+  margin-top: -6px;
+}
+
+/* The shape: a switch with three choices, like the screen widths in the top bar and the tabs on the
+   left (a canvas background, the chosen one on paper). */
+.shapes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-field);
+  background: var(--canvas);
+}
+
+.action.shape {
+  height: auto;
+  min-height: 58px;
+  padding: 8px 4px 7px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.action.shape:hover:not(:disabled) {
+  background: transparent;
+  color: var(--ink);
+}
+
+.action.shape span:last-child {
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+}
+
+.action.shape--chosen,
+.action.shape--chosen:hover:not(:disabled) {
+  background: var(--paper);
+  color: var(--accent-dark);
+}
+
+.layers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.layers .btn {
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.props-sep {
+  height: 1px;
+  margin: 16px -16px;
+  background: var(--line);
+}
+
+.fields {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field__label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field__help {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.field__error {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.input:hover {
+  border-color: var(--line-strong);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.input--invalid,
+.input--invalid:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.input--long {
+  height: auto;
+  min-height: 76px;
+  padding: 8px 10px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.input--code {
+  min-height: 132px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+select.input {
+  padding-right: 30px;
+  appearance: none;
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f625c' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") right 9px center / 16px no-repeat;
+  cursor: pointer;
+}
+
+/* The formatting bar above the texts: Bold, Italic, Link. */
+.format-bar {
+  display: flex;
+  gap: 2px;
+  margin-bottom: -2px;
+}
+
+.format-bar__btn {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  transition: background-color var(--ease), color var(--ease);
+}
+
+.format-bar__btn:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.field__hint {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.number .input {
+  width: 110px;
+}
+
+.number__range {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-field .input {
+  flex: 1;
+}
+
+.color {
+  display: flex;
+  gap: 8px;
+}
+
+.color__swatch {
+  width: 42px;
+  height: 36px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  cursor: pointer;
+  flex: none;
+}
+
+.color__swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color__swatch::-webkit-color-swatch {
+  border: 0;
+  border-radius: 6px;
+}
+
+.color__swatch::-moz-color-swatch {
+  border: 0;
+  border-radius: 6px;
+}
+
+.color__hex {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: lowercase;
+}
+
+.switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The real checkbox, invisible, over the whole row: a click anywhere toggles it. It sits in the label
+   (position: relative), otherwise it would leave the scrolling panel and make the whole page longer. */
+.switch__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch__track {
+  position: relative;
+  width: 36px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  transition: background-color var(--ease);
+  flex: none;
+}
+
+.switch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform var(--ease);
+}
+
+.switch__input:checked + .switch__track {
+  background: var(--accent);
+}
+
+.switch__input:checked + .switch__track::after {
+  transform: translateX(14px);
+}
+
+.switch__input:focus-visible + .switch__track {
+  box-shadow: var(--ring);
+}
+
+.switch__text {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.image {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  transition: border-color var(--ease), background-color var(--ease);
+}
+
+.image--over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.image--uploading .image__preview {
+  opacity: 0.5;
+}
+
+.image__preview {
+  display: grid;
+  place-items: center;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: repeating-conic-gradient(var(--canvas) 0 25%, var(--paper) 0 50%) 0 0 / 16px 16px;
+}
+
+.image__preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image__preview--empty,
+.image__preview--error {
+  align-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px dashed var(--line-strong);
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+}
+
+.image__preview--error {
+  color: var(--danger);
+}
+
+.image .input {
+  font-size: 13px;
+}
+
+.image__buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.image__buttons .btn:first-child {
+  flex: 1;
+}
+
+/* The column has the panel's width, not the longest title's: long titles get "…",
+   and the ↑ ↓ × buttons stay in view. */
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.list__card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  transition: border-color var(--ease);
+}
+
+.list__card--open {
+  border-color: var(--line-strong);
+}
+
+.list__head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 0;
+}
+
+.list__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 4px 0 10px;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: transparent;
+  text-align: left;
+}
+
+.list__toggle .ic {
+  color: var(--text-faint);
+  transition: transform var(--ease);
+}
+
+.list__toggle[aria-expanded="true"] .ic {
+  transform: rotate(90deg);
+}
+
+.list__title {
+  overflow: hidden;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.list__tools {
+  display: flex;
+  gap: 1px;
+  flex: none;
+}
+
+.list__body {
+  display: grid;
+  gap: 14px;
+  padding: 12px 12px 14px;
+  border-top: 1px solid var(--line);
+}
+
+.list__empty {
+  margin: 0;
+  padding: 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-field);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.list__add {
+  margin-top: 2px;
+  border-style: dashed;
+  color: var(--text-2);
+}
+
+.list__add .ic {
+  color: var(--accent);
+}
+
+.list__add:hover:not(:disabled) {
+  border-color: var(--accent-tint);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.notice > .ic {
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+}
+
+.notice--info {
+  border-color: var(--accent-tint);
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.notice--info strong {
+  color: inherit;
+}
+
+.notice--warning {
+  border-color: var(--danger-tint);
+  background: var(--danger-light);
+  color: var(--danger-dark);
+}
+
+.notice--warning strong {
+  color: inherit;
+}
+
+.notice--warning > .ic {
+  color: var(--danger);
+}
+
+.notice--slot {
+  margin-top: 18px;
+  color: var(--text-2);
+  background: transparent;
+  border-style: dashed;
+}
+
+.muted {
+  margin: 0 0 12px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.page-address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-address__path {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--panel);
+  color: var(--text-2);
+  line-height: 30px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.danger-zone {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.zone-panel .btn--wide {
+  margin-top: 8px;
+}
+
+/* ---- Empty states ---- */
+
+.empty-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 24px 8px;
+  padding: 20px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+  color: var(--text-2);
+  text-align: center;
+}
+
+.empty-pane > .ic {
+  margin-bottom: 4px;
+  color: var(--text-faint);
+}
+
+.empty-pane p {
+  margin: 0;
+  text-wrap: balance;
+}
+
+.empty-pane code {
+  margin-top: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--canvas);
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.empty-pane__title {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.empty-pane--tree {
+  margin: 4px 0;
+}
+
+/* ---- Menus ---- */
+
+.menu {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  gap: 1px;
+  min-width: 220px;
+  max-width: min(380px, calc(100vw - 16px));
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  animation: appear var(--ease);
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.menu__group {
+  padding: 8px 8px 4px;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.menu__sep {
+  height: 1px;
+  margin: 5px -6px;
+  background: var(--line);
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  transition: background-color var(--ease);
+}
+
+.menu__item > .ic:first-child {
+  color: var(--text-2);
+}
+
+.menu__item:hover,
+.menu__item:focus-visible {
+  background: var(--panel);
+  box-shadow: none;
+}
+
+.menu__item--checked {
+  background: var(--accent-light);
+}
+
+.menu__item--checked:hover,
+.menu__item--checked:focus-visible {
+  background: var(--accent-light);
+}
+
+.menu__item--checked > .ic {
+  color: var(--accent) !important;
+}
+
+.menu__text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.menu__label {
+  overflow: hidden;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.menu__sub {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.menu__sub--path {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.menu__badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  flex: none;
+}
+
+/* ---- Choosing a block (after "+") ---- */
+
+.picker {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  animation: appear var(--ease);
+}
+
+.picker--above {
+  animation-name: appear-above;
+}
+
+@keyframes appear-above {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* The search is the menu's head itself: no border and no ring (the whole menu has the focus, the cursor
+   blinks in the field), as in any quick search. */
+.picker__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+
+.picker__head .ic {
+  position: absolute;
+  left: 20px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.picker__search {
+  width: 100%;
+  height: 44px;
+  padding: 0 8px 0 36px;
+  border: 0;
+  border-radius: var(--radius-field);
+  background: transparent;
+  outline: none;
+}
+
+.picker__search::placeholder {
+  color: var(--text-faint);
+}
+
+.picker__search:focus,
+.picker__search:focus-visible {
+  box-shadow: none;
+}
+
+.picker__list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 8px 8px;
+  scroll-padding-top: 36px; /* the active item doesn't go under the category's stuck title */
+}
+
+.picker__group + .picker__group {
+  margin-top: 4px;
+}
+
+/* As in the palette: the category's title sticks to the top while you scroll. */
+.picker .palette__category {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -8px;
+  padding: 10px 16px 6px;
+  background: var(--paper);
+}
+
+.picker__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: transparent;
+  text-align: left;
+}
+
+.picker__item .tile {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+
+.picker__item--active {
+  background: var(--accent-light);
+}
+
+/* On the active row, the tile turns white: it stands out from the light coral background. */
+.picker__item--active .tile {
+  background: var(--paper);
+}
+
+.picker__item--active .block-item__name {
+  color: var(--accent-dark);
+}
+
+.picker__empty {
+  margin: 14px 8px;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+/* ---- Dialogs ---- */
+
+.dialog {
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow), 0 24px 60px -20px rgba(60, 30, 20, 0.4);
+  overflow: hidden;
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: appear-dialog var(--ease);
+}
+
+@keyframes appear-dialog {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+
+.dialog::backdrop {
+  background: rgba(43, 33, 29, 0.32);
+}
+
+.dialog--small {
+  width: min(400px, calc(100vw - 32px));
+}
+
+/* The site settings sit on the right, so the page on the left stays in view:
+   you see the colors and the font change on the spot. */
+.dialog--settings {
+  width: min(420px, calc(100vw - 32px));
+  height: calc(100vh - 24px);
+  max-height: calc(100vh - 24px);
+  margin: 12px 12px 12px auto;
+}
+
+.dialog--settings[open] {
+  animation-name: appear-side;
+  animation-duration: 220ms;
+}
+
+.dialog--settings::backdrop {
+  background: rgba(43, 33, 29, 0.12);
+}
+
+@keyframes appear-side {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+
+.dialog__head {
+  padding: 22px 24px 0;
+}
+
+.dialog__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.dialog__sub {
+  margin: 4px 0 0;
+  color: var(--text-2);
+}
+
+.dialog__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 24px 20px;
+}
+
+.dialog__message {
+  margin: 0;
+  color: var(--text-2);
+}
+
+/* When deleting a page: where there are still links to it. */
+.dialog__links {
+  margin-top: 14px;
+}
+
+.dialog__links ul {
+  margin: 4px 0 10px;
+  padding-left: 18px;
+}
+
+.dialog__links .switch__text {
+  color: inherit;
+  font-size: 13px;
+}
+
+.dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.dialog-form {
+  display: grid;
+  gap: 16px;
+}
+
+.address {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--paper);
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.address:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+.address__prefix {
+  display: flex;
+  align-items: center;
+  flex: none;
+  max-width: 55%;
+  padding: 0 2px 0 10px;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.address .input,
+.address .input:focus {
+  flex: 1;
+  border: 0;
+  box-shadow: none;
+  padding-left: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.settings {
+  display: grid;
+  gap: 18px;
+}
+
+.settings__group {
+  display: grid;
+  gap: 12px;
+}
+
+.settings__group + .settings__group {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.settings__title {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.settings__note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.color-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.color-row > .field__error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.color-row__text {
+  display: grid;
+  flex: 1 1 0;
+  gap: 1px;
+  min-width: 0;
+}
+
+.color-row .color {
+  width: 170px;
+  flex: none;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.slider__value {
+  width: 40px;
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: right;
+}
+
+.radius-demo {
+  width: 34px;
+  height: 26px;
+  border: 2px solid var(--accent);
+  background: var(--accent-light);
+  flex: none;
+}
+
+/* ---- Notifications ---- */
+
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 560px;
+  padding: 9px 8px 9px 14px;
+  border-radius: var(--radius-card);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  pointer-events: auto;
+  animation: toast-in var(--ease);
+}
+
+.toast > .ic:first-child {
+  color: var(--accent-tint);
+}
+
+.toast--success > .ic:first-child {
+  color: #8fd3a8;
+}
+
+.toast--error > .ic:first-child {
+  color: #f1a08e;
+}
+
+.toast__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.toast__action {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  flex: none;
+}
+
+.toast__action:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.toast__x {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  flex: none;
+}
+
+.toast__x:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.toast--leaving {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--ease), transform var(--ease);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---- Drag & drop ---- */
+
+.drag-shield {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  cursor: grabbing;
+}
+
+/* The ghost: the small card (tile + name + summary) that follows the cursor and, under it, the "where it goes" pill. */
+.ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3001;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.ghost > * {
+  animation: ghost-appear var(--ease);
+  transform-origin: 0 50%;
+}
+
+@keyframes ghost-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.ghost__card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 5px 14px 5px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--shadow), 0 1px 2px rgba(60, 30, 20, 0.08);
+  transition: opacity var(--ease);
+}
+
+.ghost .tile {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.ghost__text {
+  display: grid;
+  line-height: 1.3;
+}
+
+.ghost__summary {
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+}
+
+.ghost__where {
+  margin-left: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(60, 30, 20, 0.08);
+}
+
+.ghost__where:empty {
+  display: none;
+}
+
+.ghost--blocked .ghost__card {
+  opacity: 0.6;
+}
+
+.ghost--blocked .tile {
+  background: var(--canvas);
+  color: var(--text-faint);
+}
+
+.ghost--blocked .ghost__where {
+  display: none;
+}
+
+/* On its own canvas, the block moves itself: the ghost next to the cursor steps back. */
+.ghost--hidden {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+/* ---- The preview card (palette and the "+" menu) ---- */
+
+/* Three floors: the thumbnail (a window onto the page), what the block does, then the footer with the gesture.
+   The thumbnail sits 4 px from the card's edge, with a radius of 12 = 16 − 4: the corners are concentric. */
+.preview {
+  position: fixed;
+  z-index: 1002; /* above the "+" menu (1000), under the drag shield (3000) */
+  width: 320px;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  animation: preview-appear var(--ease);
+}
+
+/* It comes from the block it belongs to: from the left when it sits on its right, and the other way round. */
+.preview[data-side="left"] {
+  animation-name: preview-appear-left;
+}
+
+@keyframes preview-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+}
+
+@keyframes preview-appear-left {
+  from {
+    opacity: 0;
+    transform: translateX(4px);
+  }
+}
+
+/* The thumbnail's width is the card's; preview.js scales the page (1024 px) down to exactly that. */
+.preview__thumb {
+  position: relative;
+  height: 72px;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--canvas);
+  transition: height var(--ease);
+}
+
+/* The frame: above the scaled-down page, so a white block has an edge on the white card. */
+.preview__thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 1px solid var(--line);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* A block taller than the card is cut at the bottom, with a fade to paper. */
+.preview__thumb--cut::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 36px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--paper));
+}
+
+.preview__frame {
+  display: block;
+  width: 1024px;
+  height: 40px;
+  border: 0;
+  background: var(--paper);
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+/* Until the requested block is displayed, the thumbnail stays empty (it doesn't show the previous block). */
+.preview__thumb--waiting .preview__frame {
+  visibility: hidden;
+}
+
+.preview__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 12px 0;
+}
+
+.preview__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.preview__text {
+  margin: 10px 12px 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  text-wrap: pretty; /* no single word on the last line */
+}
+
+.preview__tip {
+  color: var(--text-2);
+}
+
+.preview__settings {
+  margin: 8px 12px 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.preview__label {
+  margin-right: 6px;
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+/* The footer: the gesture (drag or click), on the panel's background, set apart by a line. */
+.preview__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px -4px -4px;
+  padding: 9px 16px 10px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.preview__note > .ic {
+  margin-top: 1px;
+  color: var(--text-faint);
+}
+
+@media (max-width: 959px) {
+  .preview {
+    display: none !important;
+  }
+}
+
+body.dragging,
+body.dragging * {
+  cursor: grabbing !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Narrower screens: the panels shrink a little. */
+@media (max-width: 1280px) {
+  .app {
+    grid-template-columns: 256px minmax(0, 1fr) 300px;
+  }
+
+  .doc-button__path {
+    display: none;
+  }
+}
+
+/* Phone: the three panels don't fit (the canvas would be 0 px), so the editor says why it doesn't open. */
+.narrow {
+  display: none;
+}
+
+@media (max-width: 759px) {
+  .app {
+    display: none;
+  }
+
+  .narrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 100%;
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text-2);
+    background: var(--canvas);
+  }
+
+  .narrow img {
+    margin-bottom: 16px;
+  }
+
+  .narrow p {
+    max-width: 32ch;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .narrow .narrow__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+@media (max-width: 1100px) {
+  #site-settings,
+  #view-page,
+  #new-page {
+    width: 34px;
+    padding: 0;
+    font-size: 0;
+    gap: 0;
+  }
+
+  .status__text {
+    display: none;
+  }
+}
+
+.settings__notice {
+  margin: 8px 0 0;
+}

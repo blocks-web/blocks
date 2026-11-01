@@ -1,0 +1,38 @@
+{
+  "blocks": [
+    {
+      "id": "b_3thoop2k",
+      "type": "navbar",
+      "props": {
+        "logoText": "",
+        "logoImage": "",
+        "links": [
+          {
+            "text": "Home",
+            "link": "/"
+          },
+          {
+            "text": "Menu",
+            "link": "/products"
+          },
+          {
+            "text": "About",
+            "link": "/about"
+          },
+          {
+            "text": "Contact",
+            "link": "/contact"
+          },
+          {
+            "text": "My account",
+            "link": "/account"
+          }
+        ],
+        "buttonText": "",
+        "buttonLink": "/contact",
+        "sticky": true,
+        "showAccount": true
+      }
+    }
+  ]
+}

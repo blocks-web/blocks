@@ -1,0 +1,304 @@
+{
+  "title": "Home",
+  "access": "public",
+  "description": "Luna Café: specialty coffee roasted in-house, homemade cakes and a quiet terrace.",
+  "blocks": [
+    {
+      "id": "b_gu1sohli",
+      "type": "hero",
+      "props": {
+        "title": "Coffee worth *slowing down* for",
+        "subtitle": "A small café downtown. We roast our beans **every week** and serve them with care, from morning till evening.",
+        "buttonText": "See the menu",
+        "buttonLink": "/products",
+        "button2Text": "Write to us",
+        "button2Link": "/contact",
+        "image": "",
+        "align": "center",
+        "height": "medium"
+      }
+    },
+    {
+      "id": "b_sg1entj0",
+      "type": "cards",
+      "props": {
+        "title": "What you'll find here",
+        "subtitle": "Three reasons people keep coming back.",
+        "columns": "3",
+        "cards": [
+          {
+            "image": "/assets/demo/coffee-cups.svg",
+            "title": "Specialty coffee",
+            "text": "Beans from small farms, roasted by us every Tuesday, so they're always fresh.",
+            "linkText": "See the menu",
+            "link": "/products"
+          },
+          {
+            "image": "/assets/demo/carrot-cake.svg",
+            "title": "Homemade cakes",
+            "text": "Carrot cake, croissants and muffins, baked right here every morning.",
+            "linkText": "What's on today",
+            "link": "/products"
+          },
+          {
+            "image": "/assets/demo/terrace.svg",
+            "title": "A quiet terrace",
+            "text": "A green corner with flowers and small tables, where you can work, read or just sit in the sun.",
+            "linkText": "",
+            "link": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_stats001",
+      "type": "stats",
+      "props": {
+        "style": "lines",
+        "align": "center",
+        "stats": [
+          {
+            "value": "2019",
+            "label": "the year we opened"
+          },
+          {
+            "value": "12",
+            "label": "seats inside"
+          },
+          {
+            "value": "40",
+            "label": "coffees a day"
+          },
+          {
+            "value": "1",
+            "label": "terrace full of flowers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_rvup34zq",
+      "type": "section",
+      "props": {
+        "background": "surface",
+        "spacing": "medium",
+        "align": "left"
+      },
+      "slots": {
+        "content": [
+          {
+            "id": "b_kctv0ce7",
+            "type": "columns",
+            "props": {
+              "columns": "2",
+              "spacing": "large",
+              "align": "center",
+              "reverseOnPhone": false
+            },
+            "slots": {
+              "c1": [
+                {
+                  "id": "b_jdklfy5o",
+                  "type": "image",
+                  "props": {
+                    "src": "/assets/demo/barista.svg",
+                    "alt": "The café's espresso machine, with a cup under it",
+                    "caption": "",
+                    "width": "full",
+                    "rounded": true,
+                    "link": ""
+                  }
+                }
+              ],
+              "c2": [
+                {
+                  "id": "b_zfmckk3f",
+                  "type": "text",
+                  "props": {
+                    "title": "About us",
+                    "text": "We started in 2019 with one espresso machine, three tables and a lot of stubbornness.\n\nToday we have 12 seats inside, a terrace and, the neighbors say, the best carrot cake in the neighborhood. We know most of our regulars by name, and how they take their coffee.",
+                    "align": "left"
+                  }
+                },
+                {
+                  "id": "b_p96upfgg",
+                  "type": "button",
+                  "props": {
+                    "text": "Read our story",
+                    "link": "/about",
+                    "style": "outline",
+                    "size": "normal",
+                    "align": "left"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_n0ut4t1x",
+      "type": "news",
+      "props": {
+        "title": "News",
+        "newestFirst": true,
+        "items": [
+          {
+            "date": "2026-08-20",
+            "title": "Coffee tasting on August 28",
+            "text": "An evening with three different beans and their stories. Seats are limited, so *write to us* and we'll save you one.",
+            "link": "/contact"
+          },
+          {
+            "date": "2026-10-03",
+            "title": "New beans from Ethiopia",
+            "text": "This week we started roasting a new batch, with notes of jasmine and peach. Try it as a pour-over, or take a bag home: you'll find it on our [menu](/products).",
+            "link": ""
+          },
+          {
+            "date": "2026-09-12",
+            "title": "Longer hours on Saturdays",
+            "text": "We're now open until 8 pm on Saturdays. The terrace stays open as long as the weather is nice.",
+            "link": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_onupmzlb",
+      "type": "gallery",
+      "props": {
+        "title": "Inside the café",
+        "columns": "3",
+        "images": [
+          {
+            "image": "/assets/demo/interior.svg",
+            "description": "The counter and the board with today's menu"
+          },
+          {
+            "image": "/assets/demo/latte-art.svg",
+            "description": "A cappuccino with a milk-foam heart"
+          },
+          {
+            "image": "/assets/demo/coffee-beans.svg",
+            "description": "Freshly roasted beans"
+          },
+          {
+            "image": "/assets/demo/terrace.svg",
+            "description": "The terrace on a sunny afternoon"
+          },
+          {
+            "image": "/assets/demo/croissant.svg",
+            "description": "A butter croissant, fresh from the oven"
+          },
+          {
+            "image": "/assets/demo/cold-brew.svg",
+            "description": "Cold brew over ice, for the hot days"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_0fqgg9fy",
+      "type": "quote",
+      "props": {
+        "text": "The best flat white in town, and people who remember your name. I stop by every morning on my way to work.",
+        "author": "Daniel Brooks",
+        "role": "A regular since 2020",
+        "image": ""
+      }
+    },
+    {
+      "id": "b_vrpvzbn4",
+      "type": "faq",
+      "props": {
+        "title": "Frequently asked questions",
+        "questions": [
+          {
+            "question": "Do you have plant-based milk?",
+            "answer": "Yes: oat, almond and soy, at no extra cost."
+          },
+          {
+            "question": "Can I work from the café with my laptop?",
+            "answer": "Of course. We have free Wi-Fi and outlets at most tables.\n\nOn weekends, from 10 am to 2 pm, please leave the big tables for groups."
+          },
+          {
+            "question": "Do you sell beans to take home?",
+            "answer": "Yes, in half-pound bags. We grind them while you wait, for espresso, pour-over or a French press."
+          },
+          {
+            "question": "What do I get with an account?",
+            "answer": "Offers just for members, like our weekend discount. The account is free, and it takes a minute to create."
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_8ggdk0p6",
+      "type": "members-only",
+      "props": {
+        "message": "We have an offer just for members. Log in to see it, or create a free account in a minute.",
+        "buttonText": "Log in"
+      },
+      "slots": {
+        "content": [
+          {
+            "id": "b_koz7ylqn",
+            "type": "text",
+            "props": {
+              "title": "Members' offer: 15% off any coffee on weekends",
+              "text": "On Saturdays and Sundays, give us your account email at the counter and get 15% off any coffee.\n\nThank you for being part of Luna!",
+              "align": "center"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "b_cta00001",
+      "type": "cta",
+      "props": {
+        "title": "Have a question, or want to book a table?",
+        "text": "Write to us and we'll reply the same day.",
+        "buttonText": "Write to us",
+        "buttonLink": "/contact",
+        "button2Text": "",
+        "button2Link": "",
+        "background": "primary",
+        "align": "center"
+      }
+    },
+    {
+      "id": "b_logos001",
+      "type": "logos",
+      "props": {
+        "label": "We work with",
+        "grayscale": true,
+        "height": "medium",
+        "logos": [
+          {
+            "image": "/assets/demo/logos/north-roasters.svg",
+            "name": "North Roasters",
+            "link": ""
+          },
+          {
+            "image": "/assets/demo/logos/sunny-bakery.svg",
+            "name": "Sunny Bakery",
+            "link": ""
+          },
+          {
+            "image": "/assets/demo/logos/hillside-dairy.svg",
+            "name": "Hillside Dairy",
+            "link": ""
+          },
+          {
+            "image": "/assets/demo/logos/green-market.svg",
+            "name": "Green Market",
+            "link": ""
+          }
+        ]
+      }
+    }
+  ]
+}

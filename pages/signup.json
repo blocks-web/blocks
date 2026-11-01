@@ -1,0 +1,33 @@
+{
+  "title": "Create an account",
+  "description": "Create a free Luna Café account and get offers just for members.",
+  "access": "public",
+  "blocks": [
+    {
+      "id": "b_r41ci4e3",
+      "type": "section",
+      "props": {
+        "background": "surface",
+        "spacing": "large",
+        "align": "left"
+      },
+      "slots": {
+        "content": [
+          {
+            "id": "b_ox1i351x",
+            "type": "signup",
+            "props": {
+              "title": "Create an account",
+              "buttonText": "Create account",
+              "afterSignup": "/account",
+              "loginQuestion": "Already have an account?",
+              "loginLinkText": "Log in",
+              "loginLink": "/login",
+              "headingLevel": "h1"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

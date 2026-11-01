@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blocks</title>
+<link rel="icon" href="/_editor/logo/favicon.png">
+<link rel="stylesheet" href="editor.css">
+<script type="module" src="editor.js"></script>
+</head>
+<body>
+<!-- The texts are in English; editor.js puts them in the editor's language (i18n.js):
+     data-t translates the element's text, data-t-attr the listed attributes. -->
+<div class="app">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="brand" href="/_editor/" title="Blocks – the editor" data-t-attr="title">
+        <img src="/_editor/logo/shrimp-256.png" alt="" width="31" height="28">
+        <span>blocks</span>
+      </a>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <button type="button" id="doc-button" class="doc-button" aria-haspopup="menu" aria-expanded="false" aria-label="Choose the page you're editing" data-t-attr="aria-label"></button>
+      <button type="button" id="new-page" class="btn btn--quiet" data-icon="plus" title="New page" data-t-attr="title" data-t>New page</button>
+    </div>
+    <div class="topbar__center">
+      <div class="segment" id="devices" role="group" aria-label="Screen width" data-t-attr="aria-label">
+        <button type="button" data-device="desktop" data-icon="desktop" title="Desktop (the full width, at least 1024 px)" aria-label="Desktop" data-t-attr="title aria-label" aria-pressed="true"></button>
+        <button type="button" data-device="tablet" data-icon="tablet" title="Tablet (768 px)" aria-label="Tablet" data-t-attr="title aria-label" aria-pressed="false"></button>
+        <button type="button" data-device="phone" data-icon="phone" title="Phone (390 px)" aria-label="Phone" data-t-attr="title aria-label" aria-pressed="false"></button>
+      </div>
+    </div>
+    <div class="topbar__right">
+      <div class="btn-group">
+        <button type="button" id="undo" class="btn btn--icon" data-icon="undo" aria-label="Undo" data-t-attr="aria-label" disabled></button>
+        <button type="button" id="redo" class="btn btn--icon" data-icon="redo" aria-label="Redo" data-t-attr="aria-label" disabled></button>
+      </div>
+      <button type="button" id="status" class="status status--saved" aria-live="polite"></button>
+      <div class="segment segment--text" id="langs" role="group" aria-label="The editor's language" title="The editor's language" data-t-attr="aria-label title">
+        <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true">EN</button>
+        <button type="button" data-lang="ro" lang="ro" aria-label="Română" aria-pressed="false">RO</button>
+      </div>
+      <button type="button" id="site-settings" class="btn" data-icon="settings" title="Site settings" data-t-attr="title" data-t>Site settings</button>
+      <button type="button" id="view-page" class="btn btn--primary" data-icon-after="external" title="View page" data-t-attr="title" data-t>View page</button>
+    </div>
+  </header>
+
+  <aside class="left-pane" aria-label="Blocks and structure" data-t-attr="aria-label">
+    <div class="tabs" role="tablist" aria-label="Left panel" data-t-attr="aria-label">
+      <button type="button" role="tab" class="tab" id="tab-blocks" data-tab="blocks" data-icon="grid" aria-controls="pane-blocks" aria-selected="true" data-t>Blocks</button>
+      <button type="button" role="tab" class="tab" id="tab-structure" data-tab="structure" data-icon="layers" aria-controls="pane-structure" aria-selected="false" tabindex="-1" data-t>Structure</button>
+    </div>
+    <section id="pane-blocks" class="pane" role="tabpanel" aria-labelledby="tab-blocks">
+      <div class="search">
+        <span class="search__icon" data-icon="search"></span>
+        <input id="search" type="search" placeholder="Search for a block…" autocomplete="off" spellcheck="false" aria-label="Search for a block" data-t-attr="placeholder aria-label">
+      </div>
+      <div id="palette" class="palette"></div>
+    </section>
+    <section id="pane-structure" class="pane pane--tree" role="tabpanel" aria-labelledby="tab-structure" hidden>
+      <div id="tree" class="tree" role="tree" aria-label="The page's blocks" data-t-attr="aria-label"></div>
+    </section>
+  </aside>
+
+  <main class="canvas" aria-label="Page being edited" data-t-attr="aria-label">
+    <div id="canvas-banner" class="canvas__banner" hidden></div>
+    <div id="canvas-stage" class="canvas__stage">
+      <div id="sheet" class="sheet">
+        <iframe id="frame" src="/_editor/canvas.html" title="Page being edited" data-t-attr="title"></iframe>
+      </div>
+      <div id="canvas-zoom" class="canvas__zoom" hidden></div>
+      <div id="canvas-loading" class="canvas__loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <p data-t>Loading the editor…</p>
+      </div>
+    </div>
+  </main>
+
+  <aside class="right-pane" aria-label="Settings" data-t-attr="aria-label">
+    <div class="right-pane__head"><h2 data-t>Settings</h2></div>
+    <div id="props" class="props"></div>
+  </aside>
+</div>
+<!-- On a narrow screen (a phone) the three panels don't fit: a message instead of a broken editor. -->
+<div class="narrow" role="note">
+  <img src="/_editor/logo/shrimp-256.png" alt="" width="62" height="56">
+  <p class="narrow__title" data-t>The editor needs a wider screen</p>
+  <p data-t>Open it on a computer or a tablet. Your site looks good on phones too.</p>
+</div>
+<datalist id="page-paths"></datalist>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<div id="preview" class="preview" role="tooltip" hidden>
+  <div class="preview__thumb"></div>
+  <div class="preview__head"></div>
+  <p class="preview__text" id="preview-text"></p>
+  <p class="preview__settings"></p>
+  <p class="preview__note" data-t>Drag it onto the page or click: it goes after the selected block.</p>
+</div>
+</body>
+</html>

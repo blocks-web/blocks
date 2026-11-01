@@ -1,0 +1,66 @@
+{
+  "blocks": [
+    {
+      "id": "b_e9rc6trq",
+      "type": "footer",
+      "props": {
+        "text": "Specialty coffee roasted in-house, homemade cakes and a quiet terrace.\n12 Linden Street · open seven days a week",
+        "links": [
+          {
+            "text": "Home",
+            "link": "/"
+          },
+          {
+            "text": "Menu",
+            "link": "/products"
+          },
+          {
+            "text": "About",
+            "link": "/about"
+          },
+          {
+            "text": "Contact",
+            "link": "/contact"
+          },
+          {
+            "text": "My account",
+            "link": "/account"
+          }
+        ],
+        "copyright": "",
+        "showYear": true
+      },
+      "slots": {
+        "extra": [
+          {
+            "id": "b_social01",
+            "type": "social",
+            "props": {
+              "label": "Follow us",
+              "align": "left",
+              "showNames": false,
+              "links": [
+                {
+                  "network": "facebook",
+                  "link": "https://www.facebook.com/"
+                },
+                {
+                  "network": "instagram",
+                  "link": "https://www.instagram.com/"
+                },
+                {
+                  "network": "whatsapp",
+                  "link": "+1 555 010 0123"
+                },
+                {
+                  "network": "email",
+                  "link": "hello@example.com"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

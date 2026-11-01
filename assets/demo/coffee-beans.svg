@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <g id="b">
+      <ellipse rx="40" ry="27"/>
+      <path d="M-34 5c14-16 32 12 68-8" fill="none" stroke="#2f1a0e" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <rect width="800" height="600" fill="#e9cfa9"/>
+  <circle cx="400" cy="300" r="230" fill="#dcb98b"/>
+  <g fill="#5a3420">
+    <use href="#b" transform="translate(110 90) rotate(-25)"/>
+    <use href="#b" transform="translate(260 60) rotate(15)"/>
+    <use href="#b" transform="translate(560 80) rotate(-10)"/>
+    <use href="#b" transform="translate(700 150) rotate(40)"/>
+    <use href="#b" transform="translate(90 300) rotate(70)"/>
+    <use href="#b" transform="translate(320 250) rotate(-35)"/>
+    <use href="#b" transform="translate(470 330) rotate(20)"/>
+    <use href="#b" transform="translate(680 360) rotate(-60)"/>
+    <use href="#b" transform="translate(180 470) rotate(10)"/>
+    <use href="#b" transform="translate(420 520) rotate(-15)"/>
+    <use href="#b" transform="translate(620 520) rotate(35)"/>
+  </g>
+  <g fill="#7a4a2c">
+    <use href="#b" transform="translate(420 170) rotate(55) scale(0.85)"/>
+    <use href="#b" transform="translate(230 370) rotate(-70) scale(0.85)"/>
+    <use href="#b" transform="translate(560 220) rotate(5) scale(0.8)"/>
+    <use href="#b" transform="translate(330 420) rotate(30) scale(0.8)"/>
+    <use href="#b" transform="translate(560 430) rotate(-40) scale(0.85)"/>
+  </g>
+</svg>

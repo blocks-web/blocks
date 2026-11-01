@@ -1,0 +1,38 @@
+{
+  "name": "blocks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build websites from blocks, on your own computer, by drag and drop. Plain JavaScript, no dependencies.",
+  "keywords": [
+    "website-builder",
+    "site-builder",
+    "drag-and-drop",
+    "no-code",
+    "cms",
+    "static-site",
+    "vanilla-js",
+    "no-dependencies"
+  ],
+  "homepage": "https://github.com/blocks-web/blocks#readme",
+  "bugs": {
+    "url": "https://github.com/blocks-web/blocks/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blocks-web/blocks.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "blocks": "blocks.js"
+  },
+  "scripts": {
+    "dev": "node blocks.js dev",
+    "start": "node blocks.js start",
+    "build": "node blocks.js build",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,5 @@
+# The same line endings on every system (Windows included), so the code and the tests read the files the same way.
+* text=auto eol=lf
+
+# Images stay byte for byte.
+*.png binary

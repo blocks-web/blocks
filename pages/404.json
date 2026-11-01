@@ -1,0 +1,41 @@
+{
+  "title": "Page not found",
+  "access": "public",
+  "description": "The page you're looking for doesn't exist.",
+  "blocks": [
+    {
+      "id": "b_7ggmoft1",
+      "type": "section",
+      "props": {
+        "background": "none",
+        "spacing": "large",
+        "align": "center"
+      },
+      "slots": {
+        "content": [
+          {
+            "id": "b_tr9uroug",
+            "type": "text",
+            "props": {
+              "title": "Page not found",
+              "text": "Maybe the address changed, or there's a typo in it. No worries: the coffee is still here.",
+              "align": "center",
+              "headingLevel": "h1"
+            }
+          },
+          {
+            "id": "b_d53qa13e",
+            "type": "button",
+            "props": {
+              "text": "Back to the home page",
+              "link": "/",
+              "style": "solid",
+              "size": "normal",
+              "align": "center"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

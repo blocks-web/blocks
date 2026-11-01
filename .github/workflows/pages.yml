@@ -1,0 +1,49 @@
+# The live demo: the Luna Café site, exported as static files and published on GitHub Pages
+# at https://blocks-web.github.io/blocks/ (in the repository's settings, Pages → Source: GitHub Actions).
+name: Demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a newer one waits instead of cutting the running one short.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      # The site lives in a subfolder (/blocks/); an export with errors stops here (exit code 1).
+      - name: Export the demo site
+        run: node blocks.js build --base /blocks/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

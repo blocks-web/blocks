@@ -1,0 +1,67 @@
+name: Bug
+description: Something doesn't work the way it should.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for telling us. The clearer the steps, the faster we can fix it.
+
+        Is it a security problem? Please don't report it here: follow [SECURITY.md](https://github.com/blocks-web/blocks/blob/main/SECURITY.md) instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you see? A message, a screenshot or a short video helps a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we see it too?
+      description: The exact steps, one per line.
+      placeholder: |
+        1. Start the editor with node blocks.js dev
+        2. Drag a Gallery block onto the home page
+        3. Click the second image
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options:
+        - In the editor
+        - On the site (node blocks.js dev or start)
+        - In the static export (node blocks.js build)
+        - In the terminal (another command)
+        - In a block I wrote
+        - Somewhere else
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Blocks (the version in package.json), Node.js (node --version), and your browser if it happens in the editor or on the site.
+      placeholder: Blocks 0.1.0, Node.js 22.12.0, Firefox 140
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Messages from the terminal or the browser console
+      description: Optional. Paste them as they are; they show up as code.
+      render: text
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else?
+      description: Optional. Anything that might help, like the page's JSON file or a block's code.

@@ -1,0 +1,33 @@
+{
+  "title": "Log in",
+  "description": "Log in to your Luna Café member account.",
+  "access": "public",
+  "blocks": [
+    {
+      "id": "b_2gfriy3b",
+      "type": "section",
+      "props": {
+        "background": "surface",
+        "spacing": "large",
+        "align": "left"
+      },
+      "slots": {
+        "content": [
+          {
+            "id": "b_5evsf1oe",
+            "type": "login",
+            "props": {
+              "title": "Log in",
+              "buttonText": "Log in",
+              "afterLogin": "/account",
+              "signupQuestion": "Don't have an account?",
+              "signupLinkText": "Create one",
+              "signupLink": "/signup",
+              "headingLevel": "h1"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
